@@ -9,9 +9,9 @@ def home():
     return render_template("index.html")
 
 # About page
-@app.route("/about")
+@app.route("/test")
 def about():
-    return render_template("about.html")
+    return render_template("test.html")
 
 # Contact page
 @app.route("/contact")
@@ -19,7 +19,7 @@ def contact():
     return render_template("contact.html")
 
 # Another example route
-@app.route("/api/routes")
+@app.route("/routes")
 def routes_page():
     url = "https://api.metro.net/LACMTA_Rail/route_overview"
     headers = {'Accept': 'application/json'}
