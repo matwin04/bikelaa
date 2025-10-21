@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bike Share LA Status</title>
+    <style>
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #222;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f8f8f8;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align:center;">Bike Share LA Station Status</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Station ID</th>
+                <th>Name</th>
+                <th>Bikes Available</th>
+                <th>Docks Available</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for station in stations %}
+            <tr>
+                <td>{{ station["properties"]["station_id"] }}</td>
+                <td>{{ station["properties"]["name"] }}</td>
+                <td>{{ station["properties"]["bikes_available"] }}</td>
+                <td>{{ station["properties"]["docks_available"] }}</td>
+                <td>{{ station["properties"]["status"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

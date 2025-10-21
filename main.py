@@ -30,9 +30,20 @@ def routes_page():
     except Exception as e:
         return f"<h1>Error fetching data: {e}</h1>"
 
-    # Pass data to the template
     return render_template("routes.html", routes=data)
 
+@app.route("/bikes")
+def bikes_page():
+    url = "https://bts-status.bicycletransit.workers.dev/lax"
+    headers = {'Accept': 'application/json'}
+
+    try:
+        response = requests.get(url, headers=headers)
+        data = response.json()
+    except Exception as e:
+        return f"<h1>Error fetching data: {e}</h1>"
+
+    return render_template("bikes.html", stations=data["features"])
 
 if __name__ == "__main__":
     app.run(debug=True)

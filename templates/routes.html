@@ -1,38 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>BikeLAA</title>
+    <title>Metro Rail Routes</title>
 </head>
 <body>
-  <h1>LA Metro Rail Route Overview</h1>
-  <p><a href="/">← Back Home</a></p>
-
-  {% if routes %}
-    <table>
-      <thead>
+    <h1>LA Metro Rail Route Overview</h1>
+    <table border="1">
         <tr>
-          <th>ID</th>
-          <th>Route Name</th>
-          <th>Short Name</th>
-          <th>Type</th>
-          <th>Color</th>
+            <th>Route ID</th>
+            <th>Route Name</th>
+            <th>Color</th>
         </tr>
-      </thead>
-      <tbody>
         {% for route in routes %}
         <tr>
-          <td>{{ route.id }}</td>
-          <td>{{ route.display_name }}</td>
-          <td>{{ route.route_short_name }}</td>
-          <td>{{ route.route_type }}</td>
-          <td style="color: #{{ route.route_color }}">{{ route.route_color }}</td>
+            <td>{{ route["id"] }}</td>
+            <td>{{ route["display_name"] }}</td>
+            <td style="background-color: #{{ route["color"] }}">{{ route["color"] }}</td>
         </tr>
         {% endfor %}
-      </tbody>
     </table>
-  {% else %}
-    <p>No route data available.</p>
-  {% endif %}
 </body>
 </html>
