@@ -13,10 +13,14 @@
         </tr>
         {% for route in routes %}
         <tr>
-            <td>{{ route["id"] }}</td>
-            <td>{{ route["display_name"] }}</td>
-            <td style="background-color: #{{ route["color"] }}">{{ route["color"] }}</td>
-        </tr>
+            <td>{{ route["route_id"] }}</td>
+            <td>{{ route["route_code"] }}</td>
+            <td>
+                <img src="{{ route["iconography_url"]}}">
+            </td>
+            <td>{{ route["description"]}}</td>
+            </tr>
+            
         {% endfor %}
     </table>
 </body>
