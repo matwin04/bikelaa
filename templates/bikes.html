@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-    <h1 style="text-align:center;">Bike Share LA Station Status</h1>
+    <h1>Bike Share LA Station Status</h1>
     <table>
         <thead>
             <tr>
@@ -37,11 +37,11 @@
         <tbody>
             {% for station in stations %}
             <tr>
-                <td>{{ station["properties"]["station_id"] }}</td>
+                <td>{{ station["properties"]["id"] }}</td>
                 <td>{{ station["properties"]["name"] }}</td>
-                <td>{{ station["properties"]["bikes_available"] }}</td>
-                <td>{{ station["properties"]["docks_available"] }}</td>
-                <td>{{ station["properties"]["status"] }}</td>
+                <td id="totalDocks">{{ station["properties"]["totalDocks"] }}</td>
+                <td id="docksAvailable">{{ station["properties"]["docksAvailable"] }}</td>
+                <td>{{ station["properties"]["kioskStatus"] }}</td>
             </tr>
             {% endfor %}
         </tbody>
