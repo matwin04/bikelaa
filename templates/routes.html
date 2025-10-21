@@ -5,8 +5,34 @@
   <title>BikeLAA</title>
 </head>
 <body>
-  <h1>Welcome to BikeLAA</h1>
-  <p>View LA Metro Rail route overview below:</p>
-  <a href="/routes">View Metro Routes</a>
+  <h1>LA Metro Rail Route Overview</h1>
+  <p><a href="/">← Back Home</a></p>
+
+  {% if routes %}
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Route Name</th>
+          <th>Short Name</th>
+          <th>Type</th>
+          <th>Color</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for route in routes %}
+        <tr>
+          <td>{{ route.id }}</td>
+          <td>{{ route.display_name }}</td>
+          <td>{{ route.route_short_name }}</td>
+          <td>{{ route.route_type }}</td>
+          <td style="color: #{{ route.route_color }}">{{ route.route_color }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No route data available.</p>
+  {% endif %}
 </body>
 </html>
