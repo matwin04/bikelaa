@@ -19,10 +19,7 @@ def contact():
     return render_template("contact.html")
 
 # Another example route
-@app.route("/routes")
-def routes_page():
-    return render_template("routes.html")
-@app.route("/routes")
+@app.route("/api/routes")
 def routes_page():
     url = "https://api.metro.net/LACMTA_Rail/route_overview"
     headers = {'Accept': 'application/json'}
