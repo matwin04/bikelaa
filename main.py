@@ -11,6 +11,6 @@ def read_root():
     return render_template("index.html")
 @app.get("/test")
 def test():
-    return test("test.html")
+    return render_template("test.html")
 if __name__ == "__main__":
     app.run(debug=True)
