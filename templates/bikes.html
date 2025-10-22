@@ -1,41 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Bike Share LA Status</title>
-    <link href="/static/style.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MW Transit + Bike App | Bikes</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <!-- MapLibre GL CSS -->
+  <link href="https://unpkg.com/maplibre-gl@2.15.0/dist/maplibre-gl.css" rel="stylesheet" />
 </head>
 <body>
-    <header>
-            <nav>
-                <a href="/" class="logo">Vercel + Flask</a>
-                <div class="nav-links">
-                    <a href="/test">TEST</a>
-                    <a href="/routes">Routes</a>
-                </div>
-            </nav>
-        </header>
-    <h1>Bike Share LA Station Status</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Station ID</th>
+  <header>
+    <nav>
+      <a href="/" class="logo">🚲 MW Transit + Bike App</a>
+      <div class="nav-links">
+        <a href="/test">TEST</a>
+        <a href="/routes">Routes</a>
+        <a href="/bikes" class="active">Bikes</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Bike Stations</h1>
+    <div class="content">
+      <!-- Sidebar Table -->
+      <div class="sidebar">
+        <div class="table-container fade-in">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
                 <th>Name</th>
-                <th>Bikes Available</th>
+                <th>Total Docks</th>
                 <th>Docks Available</th>
                 <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for station in stations %}
-            <tr>
-                <td>{{ station["properties"]["id"] }}</td>
-                <td>{{ station["properties"]["name"] }}</td>
-                <td id="totalDocks">{{ station["properties"]["totalDocks"] }}</td>
-                <td id="docksAvailable">{{ station["properties"]["docksAvailable"] }}</td>
-                <td>{{ station["properties"]["kioskStatus"] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+              </tr>
+            </thead>
+            <tbody>
+              {% for station in stations %}
+              <tr>
+                  <td>{{ station["properties"]["id"] }}</td>
+                  <td>{{ station["properties"]["name"] }}</td>
+                  <td id="totalDocks">{{ station["properties"]["totalDocks"] }}</td>
+                  <td id="docksAvailable">{{ station["properties"]["docksAvailable"] }}</td>
+                  <td>{{ station["properties"]["kioskStatus"] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div id="map"></div>
+    </div>
+  </main>
+
+  <!-- MapLibre GL JS -->
+  <script src="https://unpkg.com/maplibre-gl@2.15.0/dist/maplibre-gl.js"></script>
+  <script src="/static/scripts/map.js"></script>
 </body>
 </html>
