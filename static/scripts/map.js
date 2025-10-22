@@ -1,81 +1,91 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  // Initialize MapLibre
-  const map = new maplibregl.Map({
+// map.js
+const map = new maplibregl.Map({
     container: "map",
     style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
     center: [-118.25, 34.05], // Los Angeles
     zoom: 12
-  });
-
-  map.addControl(new maplibregl.NavigationControl());
-
-  const apiUrl = "https://bts-status.bicycletransit.workers.dev/lax";
-
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-
-    // Add the GeoJSON source
-    map.on("load", () => {
-      map.addSource("stations", {
-        type: "geojson",
-        data: data
-      });
-
-      // Add circle layer for stations
-      map.addLayer({
-        id: "stations-layer",
-        type: "circle",
-        source: "stations",
-        paint: {
-          // Circle radius scales slightly with zoom
-          "circle-radius": [
-            "interpolate", ["linear"], ["zoom"],
-            10, 4,
-            15, 10
-          ],
-          // Circle color based on availability percentage
-          "circle-color": [
-            "case",
-            [">", ["get", "docksAvailable"], 15], "#00b300", // green
-            [">", ["get", "docksAvailable"], 5], "#ffcc00",  // yellow
-            "#ff4d4d" // red
-          ],
-          "circle-stroke-width": 1,
-          "circle-stroke-color": "#ffffff",
-          "circle-opacity": 0.9
-        }
-      });
-
-      // Add popups on click
-      map.on("click", "stations-layer", (e) => {
-        const props = e.features[0].properties;
-        const coords = e.features[0].geometry.coordinates;
-
-        new maplibregl.Popup()
-          .setLngLat(coords)
-          .setHTML(`
-            <strong>${props.name}</strong><br>
-            🚲 Docks: ${props.docksAvailable}/${props.totalDocks}<br>
-            <small>Status: ${props.kioskStatus}</small>
-          `)
-          .addTo(map);
-      });
-
-      // Change cursor on hover
-      map.on("mouseenter", "stations-layer", () => {
-        map.getCanvas().style.cursor = "pointer";
-      });
-      map.on("mouseleave", "stations-layer", () => {
-        map.getCanvas().style.cursor = "";
-      });
-
-      // Auto-zoom to all stations
-      const bounds = new maplibregl.LngLatBounds();
-      data.features.forEach((f) => bounds.extend(f.geometry.coordinates));
-      map.fitBounds(bounds, { padding: 40 });
-    });
-  } catch (err) {
-    console.error("Error loading stations:", err);
-  }
 });
+
+map.addControl(new maplibregl.NavigationControl());
+
+const apiUrl = "https://bts-status.bicycletransit.workers.dev/lax";
+
+async function loadStations() {
+    try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        // Convert API data to GeoJSON
+        const geojson = {
+            type: "FeatureCollection",
+            features: data.features.map(station => ({
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: station.geometry.coordinates
+                },
+                properties: station.properties
+            }))
+        };
+
+        map.on("load", () => {
+            // Add GeoJSON source
+            map.addSource("stations", { type: "geojson", data: geojson });
+
+            // Circle layer with color based on bike availability
+            map.addLayer({
+                id: "stations-layer",
+                type: "circle",
+                source: "stations",
+                paint: {
+                    "circle-radius": 7,
+                    "circle-color": [
+                        "case",
+                        ["<", ["get", "bikesAvailable"], 5], "#f56565",   // red if <5 bikes
+                        ["<", ["get", "bikesAvailable"], 10], "#f6ad55",  // orange if 5-9
+                        "#48bb78"                                           // green if 10+
+                    ],
+                    "circle-stroke-width": 1,
+                    "circle-stroke-color": "#fff"
+                }
+            });
+
+            // Popups
+            map.on("click", "stations-layer", (e) => {
+                const props = e.features[0].properties;
+
+                const bikesAvailable = props.bikesAvailable || 0;
+                const docksAvailable = props.totalDocks - bikesAvailable;
+                const electricBikes = props.electricBikesAvailable || 0;
+
+                const popupHTML = `
+                    <div class="popup">
+                        <strong>${props.name}</strong><br>
+                        🚲 Bikes: ${bikesAvailable}<br>
+                        🅿️ Docks: ${docksAvailable}<br>
+                        ${electricBikes > 0 ? `⚡ Electric: ${electricBikes}<br>` : ""}
+                        Status: ${props.kioskStatus}
+                    </div>
+                `;
+
+                new maplibregl.Popup({ className: 'bike-popup' })
+                    .setLngLat(e.features[0].geometry.coordinates)
+                    .setHTML(popupHTML)
+                    .addTo(map);
+            });
+
+            // Cursor hover effect
+            map.on("mouseenter", "stations-layer", () => {
+                map.getCanvas().style.cursor = "pointer";
+            });
+            map.on("mouseleave", "stations-layer", () => {
+                map.getCanvas().style.cursor = "";
+            });
+        });
+
+    } catch (err) {
+        console.error("Error loading stations:", err);
+    }
+}
+
+loadStations();

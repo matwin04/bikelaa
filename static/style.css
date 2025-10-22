@@ -11,6 +11,16 @@
     font-weight: 600;
     font-style: normal;
 }
+/* Popup styling */
+.bike-popup {
+    font-family: 'FF DIN Pro', sans-serif;
+    font-size: 0.85rem;
+    color: #000; /* black text */
+}
+
+.bike-popup strong {
+    color: #007cbf; /* blue station name */
+}
 .route-icon {
     width: 36px;
 }

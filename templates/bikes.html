@@ -13,16 +13,8 @@
   <script src="/static/maplibre-gl/maplibre-gl.js"></script>
 </head>
 <body>
-  <header>
-    <nav>
-      <a href="/" class="logo">🚴 MW Transit + Bike App</a>
-      <div class="nav-links">
-        <a href="/">Home</a>
-        <a href="/routes">Routes</a>
-        <a href="/bikes" class="active">Bikes</a>
-      </div>
-    </nav>
-  </header>
+  {% include "navbar.html" with context %}
+
 
   <main>
     <h1>Bike Stations</h1>
