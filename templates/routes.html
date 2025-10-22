@@ -1,27 +1,50 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Metro Rail Routes</title>
-</head>
-<body>
-    <h1>LA Metro Rail Route Overview</h1>
-    <table border="1">
-        <tr>
-            <th>Route ID</th>
-            <th>Route Name</th>
-            <th>Color</th>
-        </tr>
-        {% for route in routes %}
-        <tr>
-            <td>{{ route["route_id"] }}</td>
-            <td>{{ route["route_code"] }}</td>
-            <td>
-                <img src="{{ route["iconography_url"]}}">
-            </td>
-            <td>{{ route["description"]}}</td>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MW Transit + Bike App | LA Metro Routes</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="/" class="logo">🚇 MW Transit + Bike App</a>
+        <div class="nav-links">
+          <a href="/test">TEST</a>
+          <a href="/routes" class="active">Routes</a>
+          <a href="/bikes">Bikes</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <h1>LA Metro Rail Route Overview</h1>
+      <div class="table-container fade-in">
+        <table>
+          <thead>
+            <tr>
+              <th>Route ID</th>
+              <th>Route Name</th>
+              <th>Color</th>
+              <th>Description</th>
             </tr>
-            
-        {% endfor %}
-    </table>
-</body>
+          </thead>
+          <tbody>
+            {% for route in routes %}
+            <tr>
+              <td>{{ route.route_id }}</td>
+              <td>
+                <img class="route-icon" src="{{ route.iconography_url }}" alt="{{ route.route_name }}" />
+                {{ route.route_name }}
+              </td>
+              <td>{{ route.long_name}}</td>
+              <td>{{ route.description}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </body>
 </html>
