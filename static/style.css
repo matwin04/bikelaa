@@ -11,7 +11,9 @@
     font-weight: 600;
     font-style: normal;
 }
-
+.route-icon {
+    width: 36px;
+}
 body {
     font-family: 'FF DIN Pro', sans-serif;
     background-color: #181a20;
