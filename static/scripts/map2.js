@@ -27,13 +27,21 @@ map.on("load", () => {
         id: "metro-routes",
         type: "line",
         source: "routes",
-        "source-layer": "routes", // make sure this matches the tile
-        layout: { "line-cap": "round", "line-join": "round" },
-        paint: {
-            "line-width": 3,
-            "line-color": "#ff0000" // temporary red for visibility
+        "source-layer": "routes",
+        layout: {
+            "line-cap": "round",
+            "line-join": "round"
         },
-        filter: ["==", ["get", "agency_id"], "LACMTA_Rail"]
+        paint: {
+            "line-width": 4,
+            "line-color": [
+                "case",
+                ["has", "route_color"],       // If the route has a color
+                ["get", "route_color"], // use the hex color
+                "#ff0000"                     // fallback if no color
+            ]
+        },
+        filter: ["==", ["get", "agency_id"], "LACMTA_Rail"] // Only LA Metro
     });
 
     // Stops

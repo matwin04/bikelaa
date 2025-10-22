@@ -49,7 +49,25 @@ async function loadStations() {
                     "circle-stroke-color": "#fff"
                 }
             });
+            map.addSource("stops", {
+                type: "vector",
+                tiles: ["https://transit.land/api/v2/tiles/stops/tiles/{z}/{x}/{y}.pbf"],
+                maxzoom: 14
+            });
 
+            map.addLayer({
+                id: "metro-stops",
+                type: "circle",
+                source: "stops",
+                "source-layer": "stops", // confirm this name; can inspect tiles
+                paint: {
+                    "circle-radius": 5,
+                    "circle-color": "#1a73e8",
+                    "circle-stroke-width": 1,
+                    "circle-stroke-color": "#fff"
+                },
+                filter: ["==", ["get", "feed_onestop_id"], "f-9q5-metro~losangeles~rail"]
+            });
             // Popups
             map.on("click", "stations-layer", (e) => {
                 const props = e.features[0].properties;
