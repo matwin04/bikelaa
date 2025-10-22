@@ -1,14 +1,14 @@
 /* === Font Setup with OTF === */
 @font-face {
     font-family: 'FF DIN Pro';
-    src: url('/static/fonts/D-DIN-PRO-400-Regular.otf') format('opentype');
+    src: url('./Fonts/D-DIN-PRO-400-Regular.otf') format('opentype');
     font-weight: 400;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'FF DIN Pro';
-    src: url('/static/fonts/D-DIN-PRO-600-SemiBold.otf') format('opentype');
+    src: url('Fonts/D-DIN-PRO-600-SemiBold.otf') format('opentype');
     font-weight: 600;
     font-style: normal;
 }
