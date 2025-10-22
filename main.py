@@ -29,7 +29,6 @@ def routes_page():
         data = response.json()
     except Exception as e:
         return f"<h1>Error fetching data: {e}</h1>"
-
     return render_template("routes.html", routes=data)
 
 @app.route("/bikes")

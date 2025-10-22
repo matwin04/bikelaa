@@ -4,12 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MW Transit + Bike App | Bikes</title>
-  
-  <!-- Your style.css -->
+
+  <!-- Styles -->
   <link rel="stylesheet" href="/static/style.css">
-  
-  <!-- MapLibre GL CSS via jsDelivr -->
-  <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@2.15.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/maplibre-gl/maplibre-gl.css">
+
+  <!-- MapLibre JS -->
+  <script src="/static/maplibre-gl/maplibre-gl.js"></script>
 </head>
 <body>
   <header>
@@ -25,38 +26,10 @@
 
   <main>
     <h1>Bike Stations</h1>
-    <div class="content">
-      <div class="sidebar table-container fade-in">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Total Docks</th>
-              <th>Docks Available</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for station in stations %}
-            <tr>
-              <td>{{ station["properties"]["id"] }}</td>
-              <td>{{ station["properties"]["name"] }}</td>
-              <td>{{ station["properties"]["totalDocks"] }}</td>
-              <td>{{ station["properties"]["docksAvailable"] }}</td>
-              <td>{{ station["properties"]["kioskStatus"] }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <div id="map"></div>
-    </div>
+    <div id="map"></div>
   </main>
 
-  <!-- MapLibre GL JS via jsDelivr -->
-  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@2.15.0/dist/maplibre-gl.js"></script>
+  <!-- Your Map Script -->
   <script src="/static/scripts/map.js"></script>
 </body>
 </html>
