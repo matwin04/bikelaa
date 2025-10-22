@@ -30,7 +30,19 @@ def routes_page():
     except Exception as e:
         return f"<h1>Error fetching data: {e}</h1>"
     return render_template("routes.html", routes=data)
-
+@app.route("/routes/<route_id>")
+def route_detail(route_id):
+    url = f"https://api.metro.net/LACMTA_Rail/routes/{route_code}"
+    headers = {'Accept': 'application/json'}
+    print(url)
+    try:
+        response = requests.get(url, headers=headers)
+        data = response.json()
+    except Exception as e:
+        return f"<h1>Error fetching route {route_id}: {e}</h1>"
+    
+    # Render a template showing the details for this route
+    return render_template("route_detail.html", route=data)
 @app.route("/bikes")
 def bikes_page():
     url = "https://bts-status.bicycletransit.workers.dev/lax"

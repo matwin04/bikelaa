@@ -13,4 +13,37 @@
             </tr>
         </thead>
     </table>
+    <script>
+        const apikey = <YOUR_API_KEY>
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                zoom: 12,
+                center: [-87.628611, 41.860025],
+                sources: {
+                    routes: {
+                        type: 'vector',
+                        tiles: [
+                            `https://transit.land/api/v2/tiles/routes/tiles/{z}/{x}/{y}.pbf?apikey=${apikey}`
+                        ],
+                        maxzoom: 14
+                    }
+                },
+                layers: [{
+                    id: 'routes',
+                    type: 'line',
+                    source: 'routes',
+                    'source-layer': 'routes',
+                    layout: {
+                        'line-cap': 'round',
+                        'line-join': 'round'
+                    },
+                    paint: {
+                        'line-width': 3.0,
+                        'line-color': '#ff0000'
+                    }
+                }]
+            }
+    </script>
 </body>

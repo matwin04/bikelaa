@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MW Transit + Bike App | LA Metro Routes</title>
-    <link rel="stylesheet" href="/static/style.css">
-  </head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MW Transit + Bike App | Bikes</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/maplibre-gl/maplibre-gl.css">
+
+  <!-- MapLibre JS -->
+  <script src="/static/maplibre-gl/maplibre-gl.js"></script>
+</head>
   <body>
     {% include "navbar.html" with context %}
     <script>
@@ -14,6 +20,10 @@
     <script defer src="/_vercel/insights/script.js"></script>
     <main>
       <h1>LA Metro Rail Route Overview</h1>
+      <div id="map"></div>
+      <script src="/static/scripts/map2.js"></script>
+
+      <br>
       <div class="table-container fade-in">
         <table>
           <thead>
@@ -27,7 +37,8 @@
           <tbody>
             {% for route in routes %}
             <tr>
-              <td>{{ route.route_id }}</td>
+              <td>
+                <a href="/routes/{{route.route_id }}">{{route.route_id }}</a></td>
               <td>
                 <img class="route-icon" src="{{ route.iconography_url }}" alt="{{ route.route_name }}" />
                 {{ route.route_name }}
