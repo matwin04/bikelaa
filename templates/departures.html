@@ -19,16 +19,27 @@
     </script>
 
     <h2>Departures for {{ station_id }}</h2>
-    <ul>
-    {% for d in departures %}
-        <li>
-            Route: {{ d['route_id'] }} | Trip: {{ d['trip_id'] }} |
-            Departure Time: {{ d['departure_time'] or "N/A" }}
-        </li>
-    {% else %}
-        <li>No departures available.</li>
-    {% endfor %}
-    </ul>
-    </body>
-    {{departures.id}}
+    <table>
+        <thead>
+            <tr>
+                <th>STOP</th>
+                <th>TIME</th>
+                <th>HEADSIGN</th>
+                <th>ROUTE</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stop in data.stops %}
+                {% for dep in stop.departures %}
+                    <tr>
+                        <td>{{ stop.stop_name }}</td>
+                        <td>{{ dep.departure_time }}</td>
+                        <td>{{ dep.trip.trip_headsign }}</td>
+                        <td>{{ dep.trip.route.route_short_name }}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
 </html>
