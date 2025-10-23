@@ -92,8 +92,9 @@ map.on("load", async () => {
     // ---- VEHICLE POSITIONS ----
     async function loadVehicles() {
         try {
+            const apikey = "WOo9vL8ECMWN76EcKjsNGfo8YgNZ7c2u";
             const res = await fetch(
-                "https://transit.land/api/v2/rest/feeds/f-metro~losangeles~rail~rt/download_latest_rt/vehicle_positions.json"
+                `https://transit.land/api/v2/rest/feeds/f-metro~losangeles~rail~rt/download_latest_rt/vehicle_positions.json?apikey=${apikey}`
             );
             const data = await res.json();
 
@@ -147,10 +148,12 @@ map.on("load", async () => {
                 map.on("click", "metro-vehicles", (e) => {
                     const p = e.features[0].properties;
                     const popupHTML = `
+                    <div class="popup">
                         <strong>Train ${p.label}</strong><br>
                         Route: ${p.routeId}<br>
                         Status: ${p.status}<br>
                         Speed: ${parseFloat(p.speed).toFixed(1)} m/s
+                    </div>
                     `;
                     new maplibregl.Popup()
                         .setLngLat(e.features[0].geometry.coordinates)

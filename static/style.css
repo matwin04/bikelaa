@@ -21,6 +21,9 @@
 .bike-popup strong {
     color: #007cbf; /* blue station name */
 }
+.popup {
+    color: black;
+}
 .route-icon {
     width: 36px;
 }
