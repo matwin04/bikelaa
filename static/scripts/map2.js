@@ -1,5 +1,15 @@
 const apikey = "WOo9vL8ECMWN76EcKjsNGfo8YgNZ7c2u";
 
+// Example route-color map (map routeId -> color)
+const routeColors = {
+    "801": "#FF0000",
+    "802": "#00FF00",
+    "803": "#0000FF",
+    "804": "#FFAA00",
+    "805": "#8D4595"
+    // Add more as needed
+};
+
 const map = new maplibregl.Map({
     container: "map",
     style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
@@ -36,9 +46,9 @@ map.on("load", async () => {
             "line-width": 4,
             "line-color": [
                 "case",
-                ["has", "route_color"],       // If the route has a color
-                ["get", "route_color"], // use the hex color
-                "#ff0000"                     // fallback if no color
+                ["has", "route_color"],
+                ["get", "route_color"],
+                "#ff0000"
             ]
         },
         filter: ["==", ["get", "agency_id"], "LACMTA_Rail"]
@@ -69,7 +79,7 @@ map.on("load", async () => {
         ]
     });
 
-    // ---- POPUP FOR STOPS ----
+    // ---- POPUPS FOR STOPS ----
     map.on("click", "metro-stops", (e) => {
         const props = e.features[0].properties;
         const popupHTML = `
@@ -84,43 +94,44 @@ map.on("load", async () => {
             .setHTML(popupHTML)
             .addTo(map);
     });
-
     map.on("mouseenter", "metro-stops", () => map.getCanvas().style.cursor = "pointer");
     map.on("mouseleave", "metro-stops", () => map.getCanvas().style.cursor = "");
 
     // ---- VEHICLE POSITIONS ----
-    // ---- VEHICLE POSITIONS ----
     async function loadVehicles() {
         try {
-            const apikey = "WOo9vL8ECMWN76EcKjsNGfo8YgNZ7c2u";
             const res = await fetch(
-                `https://transit.land/api/v2/rest/feeds/f-metro~losangeles~rail~rt/download_latest_rt/vehicle_positions.json?apikey=${apikey}`
+                "https://transit.land/api/v2/rest/feeds/f-metro~losangeles~rail~rt/download_latest_rt/vehicle_positions.json",
+                {
+                    headers: {
+                        "apikey": "WOo9vL8ECMWN76EcKjsNGfo8YgNZ7c2u"
+                    }
+                }
             );
             const data = await res.json();
 
-            // Make sure we actually have entities
-            if (!data || !Array.isArray(data.entity)) {
-                console.warn("No vehicle data found in feed.");
-                return;
-            }
+            if (!data.entity) return;
 
             const features = data.entity
-                .map(e => e.vehicle)
-                .filter(v => v && v.position && v.position.longitude && v.position.latitude)
-                .map(v => ({
-                    type: "Feature",
-                    geometry: {
-                        type: "Point",
-                        coordinates: [v.position.longitude, v.position.latitude]
-                    },
-                    properties: {
-                        id: v.vehicle?.id || "unknown",
-                        label: v.vehicle?.label || "Unknown",
-                        routeId: v.trip?.routeId || "N/A",   // safe access
-                        status: v.currentStatus || "Unknown",
-                        speed: v.position?.speed || 0
-                    }
-                }));
+                .filter(v => v.vehicle && v.vehicle.position)
+                .map(v => {
+                    const routeId = v.vehicle.trip?.routeId || "unknown";
+                    return {
+                        type: "Feature",
+                        geometry: {
+                            type: "Point",
+                            coordinates: [v.vehicle.position.longitude, v.vehicle.position.latitude]
+                        },
+                        properties: {
+                            id: v.id,
+                            label: v.vehicle.vehicle?.label || "Unknown",
+                            routeId,
+                            status: v.vehicle.currentStatus || "Unknown",
+                            speed: v.vehicle.position.speed || 0,
+                            color: routeColors[routeId] || "#888888"
+                        }
+                    };
+                });
 
             const geojson = { type: "FeatureCollection", features };
 
@@ -134,14 +145,9 @@ map.on("load", async () => {
                     source: "vehicles",
                     paint: {
                         "circle-radius": 6,
-                        "circle-color": [
-                            "case",
-                            ["==", ["get", "status"], "STOPPED_AT"], "#ff0000",
-                            ["==", ["get", "status"], "IN_TRANSIT_TO"], "#00c853",
-                            "#003663ff"
-                        ],
+                        "circle-color": ["get", "color"],  // Color by route
                         "circle-stroke-width": 2,
-                        "circle-stroke-color": "#fff"
+                        "circle-stroke-color": "#ffffffff"
                     }
                 });
 
@@ -165,13 +171,12 @@ map.on("load", async () => {
                 map.on("mouseleave", "metro-vehicles", () => map.getCanvas().style.cursor = "");
             }
 
-            console.log(`Loaded ${features.length} vehicles`);
         } catch (err) {
             console.error("Failed to load vehicle positions:", err);
         }
     }
 
-    // Load vehicles immediately and refresh every 30 seconds
+    // Load immediately and repeat every 15 seconds
     await loadVehicles();
-    setInterval(loadVehicles, 30000);
+    setInterval(loadVehicles, 15000);
 });
