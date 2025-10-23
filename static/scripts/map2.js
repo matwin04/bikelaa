@@ -2,11 +2,12 @@ const apikey = "WOo9vL8ECMWN76EcKjsNGfo8YgNZ7c2u";
 
 // Example route-color map (map routeId -> color)
 const routeColors = {
-    "801": "#FF0000",
-    "802": "#00FF00",
-    "803": "#0000FF",
-    "804": "#FFAA00",
-    "805": "#8D4595"
+    "801": "#0072BC",
+    "802": "#EB131B",
+    "803": "#58A738",
+    "804": "#FDB913",
+    "805": "#A05DA5",
+    "807": "#E56DB1",
     // Add more as needed
 };
 
