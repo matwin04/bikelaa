@@ -43,7 +43,28 @@ def route_detail(route_id):
     
     # Render a template showing the details for this route
     return render_template("route_detail.html", route=data)
+@app.route("/departures/<station_id>")
+def station_departures(station_id):
+    print("Fetching departures for:", station_id)
+    url = f"https://transit.land/api/v2/rest/stops/{station_id}/departures"
+    headers = {
+        "Accept": "application/json",
+        "apikey": "WOo9vL8ECMWN76EcKjsNGfo8YgNZ7c2u"
+    }
 
+    data = {}
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()  # Raises HTTPError if status != 200
+        data = response.json()
+    except Exception as e:
+        print("Error fetching departures:", e)
+        data = {"entity": []}  # fallback empty data
+
+    # data['entity'] is usually a list of departures
+    departures = data.get("entity", [])
+
+    return render_template("departures.html", departures=departures, station_id=station_id)
 @app.route("/bikes")
 def bikes_page():
     url = "https://bts-status.bicycletransit.workers.dev/lax"

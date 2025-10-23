@@ -85,6 +85,7 @@ map.on("load", async () => {
         const props = e.features[0].properties;
         const popupHTML = `
             <div class="popup">
+                <a href="/departures/${props.onestop_id}">View</a>
                 <strong>${props.stop_name || "Unknown Station"}</strong><br>
                 Stop ID: ${props.stop_id || "—"}<br>
                 Onestop ID: ${props.onestop_id || "—"}
@@ -157,6 +158,7 @@ map.on("load", async () => {
                     const popupHTML = `
                     <div class="popup">
                         <strong>Train ${p.label}</strong><br>
+                        <a href="/trips/${p.trip}">${p.trip}</a>
                         Route: ${p.routeId}<br>
                         Status: ${p.status}<br>
                         Speed: ${parseFloat(p.speed).toFixed(1)} m/s

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MW Transit + Bike App | Bikes</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/maplibre-gl/maplibre-gl.css">
+
+  <!-- MapLibre JS -->
+  <script src="/static/maplibre-gl/maplibre-gl.js"></script>
+</head>
+<body>
+    {% include "navbar.html" with context %}
+    <script>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+
+    <h2>Departures for {{ station_id }}</h2>
+    <ul>
+    {% for d in departures %}
+        <li>
+            Route: {{ d['route_id'] }} | Trip: {{ d['trip_id'] }} |
+            Departure Time: {{ d['departure_time'] or "N/A" }}
+        </li>
+    {% else %}
+        <li>No departures available.</li>
+    {% endfor %}
+    </ul>
+    </body>
+    {{departures.id}}
+</html>
