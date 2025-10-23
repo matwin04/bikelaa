@@ -43,6 +43,7 @@ def route_detail(route_id):
     
     # Render a template showing the details for this route
     return render_template("route_detail.html", route=data)
+
 @app.route("/bikes")
 def bikes_page():
     url = "https://bts-status.bicycletransit.workers.dev/lax"
