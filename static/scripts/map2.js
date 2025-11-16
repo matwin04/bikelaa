@@ -1,168 +1,139 @@
-const apikey = "WOo9vL8ECMWN76EcKjsNGfo8YgNZ7c2u";
-
-// Map routeId -> color
-const routeColors = {
-    "801": "#0072BC",
-    "802": "#EB131B",
-    "803": "#58A738",
-    "804": "#FDB913",
-    "805": "#A05DA5",
-    "807": "#E56DB1",
-    // Add more as needed
-};
-
-// Initialize the map
+// map.js
 const map = new maplibregl.Map({
     container: "map",
     style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
     center: [-118.25, 34.05],
-    zoom: 12,
-    transformRequest: (url, resourceType) => {
-        if (resourceType === "Tile" && url.startsWith("https://transit.land")) {
-            return { url: url + `?apikey=${apikey}` };
-        }
-    }
+    zoom: 10
 });
 
-map.addControl(new maplibregl.NavigationControl());
+// Keep a dictionary of vehicles
+const vehicles = {};
 
-// Helper to fetch GeoJSON
-async function fetchGeoJSON(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to fetch ${url}`);
-    return res.json();
-}
+// Route colors
+const routeColors = {
+    801: "#0072BC",
+    802: "#EB131B",
+    803: "#58A738",
+    804: "#FDB913",
+    805: "#A05DA5",
+    807: "#E56DB1",
+    unknown: "#AAAAAA"
+};
 
-map.on("load", async () => {
-
-    // ---- ROUTES ----
-    map.addSource("routes", {
-        type: "vector",
-        tiles: ["https://transit.land/api/v2/tiles/routes/tiles/{z}/{x}/{y}.pbf"],
-        maxzoom: 14
+// Add GeoJSON source and circle layer when map loads
+map.on("load", () => {
+    map.addSource("trains", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] }
     });
-
+    map.addSource("stations", {
+        type: "geojson",
+        data: "/static/data/LACMTA_Rail/stations.geojson"
+    });
+    map.addSource("routes", {
+        type: "geojson",
+        data: "/static/data/LACMTA_Rail/routes.geojson"
+    });
     map.addLayer({
-        id: "metro-routes",
+        id: "routes-layer",
         type: "line",
         source: "routes",
-        "source-layer": "routes",
-        layout: { "line-cap": "round", "line-join": "round" },
         paint: {
-            "line-width": 4,
-            "line-color": ["case", ["has", "route_color"], ["get", "route_color"], "#ff0000"]
-        },
-        filter: ["==", ["get", "agency_id"], "LACMTA_Rail"]
+            "line-color": "#002041",
+            "line-width": 3
+        }
     });
-
-    // ---- STOPS ----
-    const stopsData = await fetchGeoJSON(
-        `https://transit.land/api/v2/rest/stops?feed_onestop_id=f-9q5-metro~losangeles~rail&format=geojson&apikey=${apikey}`
-    );
-
-    map.addSource("metro-stops", { type: "geojson", data: stopsData });
-
     map.addLayer({
-        id: "metro-stops",
+        id: "stations-layer",
         type: "circle",
-        source: "metro-stops",
+        source: "stations",
         paint: {
-            "circle-radius": 5,
-            "circle-color": "#1a73e8",
+            "circle-radius": 3,
+            "circle-stroke-width": 1,
+            "circle-stroke-color": "#000",
+            "circle-color": "#fff"
+        }
+    });
+    map.addLayer({
+        id: "train-dots",
+        type: "circle",
+        source: "trains",
+        paint: {
+            "circle-radius": 6,
+            "circle-color": ["get", "color"],
             "circle-stroke-width": 1,
             "circle-stroke-color": "#fff"
         }
     });
 
-    // ---- POPUPS FOR STOPS ----
-    map.on("click", "metro-stops", (e) => {
-        const props = e.features[0].properties;
-        const popupHTML = `
-            <div class="popup">
-                <a href="/departures/${props.onestop_id}">View Departures</a><br>
-                <strong>${props.stop_name || "Unknown Station"}</strong><br>
-                Stop ID: ${props.stop_id || "—"}<br>
-                Onestop ID: ${props.onestop_id || "—"}
-            </div>
-        `;
-        new maplibregl.Popup({ className: "popup" })
-            .setLngLat(e.features[0].geometry.coordinates)
-            .setHTML(popupHTML)
+    // Click event for train dots
+    map.on("click", "train-dots", (e) => {
+        const feature = e.features[0];
+        const coords = feature.geometry.coordinates.slice();
+        const props = feature.properties;
+
+        // Parse the stored JSON string back into an object
+        let vehicleData = {};
+        try {
+            vehicleData = JSON.parse(props.data);
+        } catch (err) {
+            console.error("Failed to parse vehicle data:", err);
+        }
+
+        new maplibregl.Popup()
+            .setLngLat(coords)
+            .setHTML(
+                `
+                <b>Route:</b> ${vehicleData.route_code || "unknown"}<br>
+                <b>ID:</b> ${vehicleData.vehicle?.vehicle?.id || vehicleData.id || "unknown"}<br>
+                <b>Status:</b> ${vehicleData.vehicle?.currentStatus || "N/A"}<br>
+                <b>Lat/Lng:</b> ${vehicleData.vehicle?.position?.latitude.toFixed(5) || "N/A"}, 
+                ${vehicleData.vehicle?.position?.longitude.toFixed(5) || "N/A"}
+            `
+            )
             .addTo(map);
     });
-    map.on("mouseenter", "metro-stops", () => map.getCanvas().style.cursor = "pointer");
-    map.on("mouseleave", "metro-stops", () => map.getCanvas().style.cursor = "");
 
-    // ---- VEHICLE POSITIONS ----
-    async function loadVehicles() {
-        try {
-            const res = await fetch(
-                "https://transit.land/api/v2/rest/feeds/f-metro~losangeles~rail~rt/download_latest_rt/vehicle_positions.json",
-                { headers: { "apikey": apikey } }
-            );
-            const data = await res.json();
-            if (!data.entity) return;
-
-            const features = data.entity
-                .filter(v => v.vehicle && v.vehicle.position)
-                .map(v => {
-                    const routeId = v.vehicle.trip?.routeId || "unknown";
-                    return {
-                        type: "Feature",
-                        geometry: {
-                            type: "Point",
-                            coordinates: [v.vehicle.position.longitude, v.vehicle.position.latitude]
-                        },
-                        properties: {
-                            id: v.id,
-                            label: v.vehicle.vehicle?.label || "Unknown",
-                            routeId,
-                            status: v.vehicle.currentStatus || "Unknown",
-                            speed: v.vehicle.position.speed || 0,
-                            color: routeColors[routeId] || "#888888"
-                        }
-                    };
-                });
-
-            const geojson = { type: "FeatureCollection", features };
-
-            if (map.getSource("vehicles")) {
-                map.getSource("vehicles").setData(geojson);
-            } else {
-                map.addSource("vehicles", { type: "geojson", data: geojson });
-                map.addLayer({
-                    id: "metro-vehicles",
-                    type: "circle",
-                    source: "vehicles",
-                    paint: {
-                        "circle-radius": 6,
-                        "circle-color": ["get", "color"],
-                        "circle-stroke-width": 2,
-                        "circle-stroke-color": "#ffffffff"
-                    }
-                });
-
-                // Popups for vehicles
-                map.on("click", "metro-vehicles", (e) => {
-                    const p = e.features[0].properties;
-                    const popupHTML = `
-                        <div class="popup">
-                            <strong>Train ${p.label}</strong><br>
-                            Route: ${p.routeId}<br>
-                            Status: ${p.status}<br>
-                            Speed: ${parseFloat(p.speed).toFixed(1)} m/s
-                        </div>
-                    `;
-                    new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(popupHTML).addTo(map);
-                });
-                map.on("mouseenter", "metro-vehicles", () => map.getCanvas().style.cursor = "pointer");
-                map.on("mouseleave", "metro-vehicles", () => map.getCanvas().style.cursor = "");
-            }
-        } catch (err) {
-            console.error("Failed to load vehicle positions:", err);
-        }
-    }
-
-    await loadVehicles();
-    setInterval(loadVehicles, 15000);
+    // Change cursor when hovering over train dots
+    map.on("mouseenter", "train-dots", () => (map.getCanvas().style.cursor = "pointer"));
+    map.on("mouseleave", "train-dots", () => (map.getCanvas().style.cursor = ""));
 });
+
+// Connect to WebSocket
+const ws = new WebSocket("wss://api.metro.net/ws/LACMTA_Rail/vehicle_positions");
+
+ws.onmessage = (event) => {
+    try {
+        const data = JSON.parse(event.data);
+        const vehicle = data.vehicle;
+        if (!vehicle || !vehicle.position) return;
+
+        const id = vehicle.vehicle?.id || data.id;
+        const lat = vehicle.position.latitude;
+        const lng = vehicle.position.longitude;
+        const route = data.route_code || "unknown";
+
+        if (!lat || !lng) return;
+
+        // Store the entire JSON as a string in properties
+        vehicles[id] = {
+            coordinates: [lng, lat],
+            color: routeColors[route] || routeColors["unknown"],
+            data: JSON.stringify(data) // store as string
+        };
+
+        // Convert vehicles to GeoJSON features
+        const features = Object.values(vehicles).map((v) => ({
+            type: "Feature",
+            geometry: { type: "Point", coordinates: v.coordinates },
+            properties: { color: v.color, data: v.data }
+        }));
+
+        const source = map.getSource("trains");
+        if (source) source.setData({ type: "FeatureCollection", features });
+    } catch (err) {
+        console.error("WebSocket parse error:", err);
+    }
+};
+
+ws.onclose = () => console.log("WebSocket closed");

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LA Metro Live Trains</title>
+<link href="https://unpkg.com/maplibre-gl@2.5.0/dist/maplibre-gl.css" rel="stylesheet" />
+<style>
+  body, html { margin:0; padding:0; height:100%; }
+  #map { width:100%; height:100%; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/maplibre-gl@2.5.0/dist/maplibre-gl.js"></script>
+<script>
+const map = new maplibregl.Map({
+    container: "map",
+    style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+    center: [-118.25, 34.05],
+    zoom: 12
+});
+
+map.addControl(new maplibregl.NavigationControl());
+
+// Source for live vehicles
+map.on("load", () => {
+    map.addSource("vehicles", { type: "geojson", data: { type:"FeatureCollection", features:[] } });
+
+    map.addLayer({
+        id: "metro-vehicles",
+        type: "circle",
+        source: "vehicles",
+        paint: {
+            "circle-radius": 6,
+            "circle-color": "#ff0000",
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#ffffff"
+        }
+    });
+
+    map.on("click", "metro-vehicles", e => {
+        const p = e.features[0].properties;
+        new maplibregl.Popup()
+            .setLngLat(e.features[0].geometry.coordinates)
+            .setHTML(`<strong>Train ${p.label || "Unknown"}</strong><br>Route: ${p.routeId || "N/A"}<br>Status: ${p.status || "Unknown"}<br>Speed: ${parseFloat(p.speed||0).toFixed(1)} m/s`)
+            .addTo(map);
+    });
+
+    // Connect to WebSocket
+    const ws = new WebSocket("wss://api.metro.net/ws/LACMTA_Rail/vehicle_positions");
+
+    ws.onopen = () => console.log("Connected to LA Metro WebSocket");
+
+    ws.onmessage = event => {
+        const msg = JSON.parse(event.data);
+        if (!msg.entity) return;
+
+        const features = msg.entity
+            .filter(v => v.vehicle && v.vehicle.position)
+            .map(v => ({
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [v.vehicle.position.longitude, v.vehicle.position.latitude]
+                },
+                properties: {
+                    id: v.id,
+                    label: v.vehicle.vehicle?.label || "Unknown",
+                    routeId: v.vehicle.trip?.routeId || "Unknown",
+                    status: v.vehicle.currentStatus || "Unknown",
+                    speed: v.vehicle.position.speed || 0
+                }
+            }));
+
+        map.getSource("vehicles").setData({ type:"FeatureCollection", features });
+    };
+
+    ws.onerror = err => console.error("WebSocket error:", err);
+});
+</script>
+
+</body>
+</html>
