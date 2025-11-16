@@ -83,12 +83,13 @@ map.on("load", () => {
         new maplibregl.Popup()
             .setLngLat(coords)
             .setHTML(
-                `
+                `<div class="popup">
                 <b>Route:</b> ${vehicleData.route_code || "unknown"}<br>
                 <b>ID:</b> ${vehicleData.vehicle?.vehicle?.id || vehicleData.id || "unknown"}<br>
                 <b>Status:</b> ${vehicleData.vehicle?.currentStatus || "N/A"}<br>
                 <b>Lat/Lng:</b> ${vehicleData.vehicle?.position?.latitude.toFixed(5) || "N/A"}, 
                 ${vehicleData.vehicle?.position?.longitude.toFixed(5) || "N/A"}
+                </div>
             `
             )
             .addTo(map);
