@@ -44,7 +44,7 @@ map.on("load", () => {
         }
     });
     map.addLayer({
-        id: "stations-layer",
+        id: "station-dots",
         type: "circle",
         source: "stations",
         paint: {
@@ -67,6 +67,32 @@ map.on("load", () => {
     });
 
     // Click event for train dots
+    map.on("click","station-dots"),(e)=>{
+        const feature = e.features[0];
+        const coords = feature.geometry.coordinates.slice();
+        const props = feature.properties;
+        let stationData = {};
+        try {
+            stationData = JSON.parse(props.data);
+        } catch (err) {
+            console.error
+        }
+        new maplibregl.Popup()
+        .setLngLat(coords)
+        .setHTML(
+            `<div class="popup">
+                <b>Route:</b> ${vehicleData.route_code || "unknown"}<br>
+                <b>ID:</b> ${vehicleData.vehicle?.vehicle?.id || vehicleData.id || "unknown"}<br>
+            <b>Status:</b> ${vehicleData.vehicle?.currentStatus || "N/A"}<br>
+            <b>Lat/Lng:</b> ${vehicleData.vehicle?.position?.latitude.toFixed(5) || "N/A"}, 
+            ${vehicleData.vehicle?.position?.longitude.toFixed(5) || "N/A"}
+            ${vehicleData.vehicle.trip.tripId}<br>
+            ${vehicleData.vehicle.currentStopSequence}<br>
+            
+            </div>
+            `
+            )
+            .addTo(map);
     map.on("click", "train-dots", (e) => {
         const feature = e.features[0];
         const coords = feature.geometry.coordinates.slice();
@@ -89,6 +115,9 @@ map.on("load", () => {
                 <b>Status:</b> ${vehicleData.vehicle?.currentStatus || "N/A"}<br>
                 <b>Lat/Lng:</b> ${vehicleData.vehicle?.position?.latitude.toFixed(5) || "N/A"}, 
                 ${vehicleData.vehicle?.position?.longitude.toFixed(5) || "N/A"}
+                ${vehicleData.vehicle.trip.tripId}<br>
+                ${vehicleData.vehicle.currentStopSequence}<br>
+                
                 </div>
             `
             )
@@ -112,6 +141,7 @@ ws.onmessage = (event) => {
         const id = vehicle.vehicle?.id || data.id;
         const lat = vehicle.position.latitude;
         const lng = vehicle.position.longitude;
+        const tripId = vehicle.trip.TripId;
         const route = data.route_code || "unknown";
 
         if (!lat || !lng) return;
