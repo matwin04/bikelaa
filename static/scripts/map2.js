@@ -94,8 +94,28 @@ map.on("load", () => {
             `)
             .addTo(map);
     });
+    map.on("click", "station-dots", (e) => {
+    const feature = e.features[0];
+    const coords = feature.geometry.coordinates.slice();
+    const props = feature.properties;
 
+    const stopId = props.StopNumber;
+    const stationName = props.Station || "Unknown Station";
+
+    new maplibregl.Popup()
+        .setLngLat(coords)
+        .setHTML(`
+            <div class="popup">
+                <b>${stationName}</b><br>
+                Stop ID: ${stopId}<br><br>
+                <a href="/station/${stopId}" class="popup-link">View Departures →</a>
+            </div>
+        `)
+        .addTo(map);
+    });
     // Change cursor when hovering over train dots
+    map.on("mouseenter", "station-dots", () => map.getCanvas().style.cursor = "pointer");
+    map.on("mouseleave", "station-dots", () => map.getCanvas().style.cursor = "");
     map.on("mouseenter", "train-dots", () => map.getCanvas().style.cursor = "pointer");
     map.on("mouseleave", "train-dots", () => map.getCanvas().style.cursor = "");
 });

@@ -17,7 +17,17 @@
     font-size: 0.85rem;
     color: #000; /* black text */
 }
+.depart-soon {
+  background-color: #00b934; /* red */
+}
 
+.depart-medium {
+  color: #c89600; /* yellow */
+}
+
+.depart-late {
+    color: #ff0000; /* green */
+}
 .bike-popup strong {
     color: #007cbf; /* blue station name */
 }
