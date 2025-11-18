@@ -67,32 +67,6 @@ map.on("load", () => {
     });
 
     // Click event for train dots
-    map.on("click","station-dots"),(e)=>{
-        const feature = e.features[0];
-        const coords = feature.geometry.coordinates.slice();
-        const props = feature.properties;
-        let stationData = {};
-        try {
-            stationData = JSON.parse(props.data);
-        } catch (err) {
-            console.error
-        }
-        new maplibregl.Popup()
-        .setLngLat(coords)
-        .setHTML(
-            `<div class="popup">
-                <b>Route:</b> ${vehicleData.route_code || "unknown"}<br>
-                <b>ID:</b> ${vehicleData.vehicle?.vehicle?.id || vehicleData.id || "unknown"}<br>
-            <b>Status:</b> ${vehicleData.vehicle?.currentStatus || "N/A"}<br>
-            <b>Lat/Lng:</b> ${vehicleData.vehicle?.position?.latitude.toFixed(5) || "N/A"}, 
-            ${vehicleData.vehicle?.position?.longitude.toFixed(5) || "N/A"}
-            ${vehicleData.vehicle.trip.tripId}<br>
-            ${vehicleData.vehicle.currentStopSequence}<br>
-            
-            </div>
-            `
-            )
-            .addTo(map);
     map.on("click", "train-dots", (e) => {
         const feature = e.features[0];
         const coords = feature.geometry.coordinates.slice();
@@ -108,25 +82,22 @@ map.on("load", () => {
 
         new maplibregl.Popup()
             .setLngLat(coords)
-            .setHTML(
-                `<div class="popup">
+            .setHTML(`
+                <div class="popup">
+                <a href="/trips/${vehicleData.vehicle?.trip?.tripId}">${vehicleData.vehicle?.trip?.tripId}</a><br>
                 <b>Route:</b> ${vehicleData.route_code || "unknown"}<br>
                 <b>ID:</b> ${vehicleData.vehicle?.vehicle?.id || vehicleData.id || "unknown"}<br>
                 <b>Status:</b> ${vehicleData.vehicle?.currentStatus || "N/A"}<br>
                 <b>Lat/Lng:</b> ${vehicleData.vehicle?.position?.latitude.toFixed(5) || "N/A"}, 
                 ${vehicleData.vehicle?.position?.longitude.toFixed(5) || "N/A"}
-                ${vehicleData.vehicle.trip.tripId}<br>
-                ${vehicleData.vehicle.currentStopSequence}<br>
-                
                 </div>
-            `
-            )
+            `)
             .addTo(map);
     });
 
     // Change cursor when hovering over train dots
-    map.on("mouseenter", "train-dots", () => (map.getCanvas().style.cursor = "pointer"));
-    map.on("mouseleave", "train-dots", () => (map.getCanvas().style.cursor = ""));
+    map.on("mouseenter", "train-dots", () => map.getCanvas().style.cursor = "pointer");
+    map.on("mouseleave", "train-dots", () => map.getCanvas().style.cursor = "");
 });
 
 // Connect to WebSocket
@@ -141,7 +112,6 @@ ws.onmessage = (event) => {
         const id = vehicle.vehicle?.id || data.id;
         const lat = vehicle.position.latitude;
         const lng = vehicle.position.longitude;
-        const tripId = vehicle.trip.TripId;
         const route = data.route_code || "unknown";
 
         if (!lat || !lng) return;
@@ -154,7 +124,7 @@ ws.onmessage = (event) => {
         };
 
         // Convert vehicles to GeoJSON features
-        const features = Object.values(vehicles).map((v) => ({
+        const features = Object.values(vehicles).map(v => ({
             type: "Feature",
             geometry: { type: "Point", coordinates: v.coordinates },
             properties: { color: v.color, data: v.data }
@@ -162,6 +132,7 @@ ws.onmessage = (event) => {
 
         const source = map.getSource("trains");
         if (source) source.setData({ type: "FeatureCollection", features });
+
     } catch (err) {
         console.error("WebSocket parse error:", err);
     }

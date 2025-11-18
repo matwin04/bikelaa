@@ -33,9 +33,12 @@ def bikes_page():
         return f"<h1>Error fetching data: {e}</h1>"
 
     return render_template("bikes.html", stations=data["features"])
+
 @app.route("/map")
 def map():
     return render_template("map.html")
+
+
 @app.route("/api/metro", methods=["GET"])
 def metro_one_ping():
     import asyncio, websockets, json

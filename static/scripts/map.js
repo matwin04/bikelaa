@@ -71,7 +71,7 @@ async function loadStations() {
             // Popups
             map.on("click", "stations-layer", (e) => {
                 const props = e.features[0].properties;
-
+                console.log(props)
                 const bikesAvailable = props.bikesAvailable || 0;
                 const docksAvailable = props.totalDocks - bikesAvailable;
                 const electricBikes = props.electricBikesAvailable || 0;
